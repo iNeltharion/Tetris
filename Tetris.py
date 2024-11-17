@@ -185,13 +185,20 @@ class Tetris:
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3))
         screen.blit(text, text_rect)
 
-        # Кнопка "Restart"
+        # Кнопка "Restart" с красивым оформлением
         button_width, button_height = 200, 50
         restart_button = pygame.Rect((SCREEN_WIDTH - button_width) // 2, SCREEN_HEIGHT // 2 + 50, button_width,
                                      button_height)
-        pygame.draw.rect(screen, (0, 0, 255), restart_button)  # Синий цвет рамки
-        restart_text = font.render("Restart", True, (255, 255, 255))  # Белый текст на кнопке
-        screen.blit(restart_text, (SCREEN_WIDTH // 2 - 70, SCREEN_HEIGHT // 2 + 60))
+        pygame.draw.rect(screen, (30, 144, 255), restart_button, border_radius=15)  # Синий фон с закругленными углами
+
+        # Эффект при наведении
+        mouse_pos = pygame.mouse.get_pos()
+        if restart_button.collidepoint(mouse_pos):
+            pygame.draw.rect(screen, (70, 130, 180), restart_button, border_radius=15)
+
+        restart_text = font.render("Restart", True, WHITE)
+        screen.blit(restart_text, (restart_button.x + (button_width - restart_text.get_width()) // 2,
+                                   restart_button.y + (button_height - restart_text.get_height()) // 2))
 
         return restart_button
 
