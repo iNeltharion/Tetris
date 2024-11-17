@@ -39,6 +39,11 @@ SHAPES = [
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Tetris')
 
+# Загрузка и воспроизведение музыки
+pygame.mixer.music.load('korobeyniki.mp3')  # Замените на путь к вашему файлу музыки
+pygame.mixer.music.set_volume(0.3)  # Установка громкости (от 0.0 до 1.0)
+pygame.mixer.music.play(-1, 0.0)  # Повторение музыки бесконечно
+
 
 # Основной класс игры
 class Tetris:
@@ -180,25 +185,19 @@ class Tetris:
             self.game_over = True
 
     def draw_game_over(self):
-        font = pygame.font.Font(None, 72)
+        font = pygame.font.Font(None, 48)
         text = font.render("Game Over", True, (255, 0, 0))
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
         screen.blit(text, text_rect)
 
-        # Кнопка "Restart" с красивым оформлением
-        button_width, button_height = 200, 50
-        restart_button = pygame.Rect((SCREEN_WIDTH - button_width) // 2, SCREEN_HEIGHT // 2 + 50, button_width,
-                                     button_height)
-        pygame.draw.rect(screen, (30, 144, 255), restart_button, border_radius=15)  # Синий фон с закругленными углами
+        # Кнопка перезапуска
+        restart_button = pygame.Rect(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2, SCREEN_WIDTH // 2, 50)
+        pygame.draw.rect(screen, (0, 0, 255), restart_button, border_radius=15)
 
-        # Эффект при наведении
-        mouse_pos = pygame.mouse.get_pos()
-        if restart_button.collidepoint(mouse_pos):
-            pygame.draw.rect(screen, (70, 130, 180), restart_button, border_radius=15)
-
+        # Текст на кнопке
         restart_text = font.render("Restart", True, WHITE)
-        screen.blit(restart_text, (restart_button.x + (button_width - restart_text.get_width()) // 2,
-                                   restart_button.y + (button_height - restart_text.get_height()) // 2))
+        screen.blit(restart_text, (restart_button.x + (restart_button.width - restart_text.get_width()) // 2,
+                                   restart_button.y + (restart_button.height - restart_text.get_height()) // 2))
 
         return restart_button
 
