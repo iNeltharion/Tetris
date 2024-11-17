@@ -182,12 +182,16 @@ class Tetris:
     def draw_game_over(self):
         font = pygame.font.Font(None, 72)
         text = font.render("Game Over", True, (255, 0, 0))
-        screen.blit(text, (SCREEN_WIDTH // 4, SCREEN_HEIGHT // 3))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3))
+        screen.blit(text, text_rect)
 
-        restart_button = pygame.Rect(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2, SCREEN_WIDTH // 2, 50)
-        pygame.draw.rect(screen, (0, 255, 0), restart_button)
-        restart_text = font.render("Restart", True, (0, 0, 0))
-        screen.blit(restart_text, (SCREEN_WIDTH // 4 + 50, SCREEN_HEIGHT // 2 + 10))
+        # Кнопка "Restart"
+        button_width, button_height = 200, 50
+        restart_button = pygame.Rect((SCREEN_WIDTH - button_width) // 2, SCREEN_HEIGHT // 2 + 50, button_width,
+                                     button_height)
+        pygame.draw.rect(screen, (0, 0, 255), restart_button)  # Синий цвет рамки
+        restart_text = font.render("Restart", True, (255, 255, 255))  # Белый текст на кнопке
+        screen.blit(restart_text, (SCREEN_WIDTH // 2 - 70, SCREEN_HEIGHT // 2 + 60))
 
         return restart_button
 
