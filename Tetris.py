@@ -26,14 +26,15 @@ GRID_LINE_WIDTH = 2  # Толщина линии сетки
 
 # Фигуры (классический вид)
 SHAPES = [
-    [[1, 1, 1], [0, 1, 0]],  # T-образная
-    [[1, 1, 1, 1]],  # Линия
-    [[1, 1], [1, 1]],  # Квадрат
-    [[1, 0, 0], [1, 1, 1]],  # L-образная
-    [[0, 0, 1], [1, 1, 1]],  # Z-образная
-    [[0, 0, 1], [1, 1, 1]],  # S-образная
-    [[1, 0], [1, 0], [1, 1]]  # J-образная
+    [[0, 1, 0], [1, 1, 1]],  # T-образная фигура
+    [[1, 1, 1, 1]],  # Линия (I-образная фигура)
+    [[1, 1], [1, 1]],  # Квадрат (O-образная фигура)
+    [[1, 0, 0], [1, 1, 1]],  # L-образная фигура
+    [[0, 0, 1], [1, 1, 1]],  # J-образная фигура
+    [[1, 1, 0], [0, 1, 1]],  # Z-образная фигура
+    [[0, 1, 1], [1, 1, 0]]   # S-образная фигура
 ]
+
 
 # Инициализация экрана
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -48,6 +49,7 @@ pygame.mixer.music.play(-1, 0.0)  # Повторение музыки беско
 # Основной класс игры
 class Tetris:
     def __init__(self):
+        self.current_color = None
         self.board = [[0] * COLS for _ in range(ROWS)]
         self.game_over = False
         self.is_paused = False
@@ -61,7 +63,8 @@ class Tetris:
         self.piece_history = []  # История использованных фигур
 
 
-    def draw_pause_message(self):
+    @staticmethod
+    def draw_pause_message():
         """Рисует сообщение о паузе на экране."""
         font = pygame.font.Font(None, 48)
         text = font.render("Paused", True, (0, 0, 255))
@@ -69,14 +72,16 @@ class Tetris:
         screen.blit(text, text_rect)
 
     def new_piece(self):
-        # Генерация новой фигуры, которая не повторяется сразу после предыдущей
-        shape = random.choice([s for s in SHAPES if s not in self.piece_history[-3:]])  # Избегаем повторений
-        self.piece_history.append(shape)
+        shape_type = random.choice([
+            s for s in SHAPES
+            if s not in [piece for piece in self.piece_history[-3:]]
+        ])  # Избегаем повторения типов фигур
+        self.piece_history.append(shape_type)
         if len(self.piece_history) > 5:
             self.piece_history.pop(0)
 
         color = random.choice(COLOR_LIST)
-        self.current_piece = shape
+        self.current_piece = shape_type
         self.current_color = color
         self.current_pos = [0, COLS // 2 - len(self.current_piece[0]) // 2]
 
@@ -134,13 +139,13 @@ class Tetris:
 
     def auto_fall(self):
         # Увеличиваем скорость падения каждые 10 очков
-        if self.score >= 10 and self.score < 20:
+        if 10 <= self.score < 20:
             self.fall_speed = 0.45
-        elif self.score >= 20 and self.score < 30:
+        elif 20 <= self.score < 30:
             self.fall_speed = 0.4
-        elif self.score >= 30 and self.score < 40:
+        elif 30 <= self.score < 40:
             self.fall_speed = 0.35
-        elif self.score >= 40 and self.score < 50:
+        elif 40 <= self.score < 50:
             self.fall_speed = 0.3
         elif self.score >= 50:
             self.fall_speed = 0.25
@@ -154,7 +159,8 @@ class Tetris:
             self.move_piece(0, 1)
             self.last_move_time = time.time()
 
-    def draw_grid(self):
+    @staticmethod
+    def draw_grid():
         # Рисуем вертикальные линии
         for x in range(0, SCREEN_WIDTH, BLOCK_SIZE):
             pygame.draw.line(screen, GRID_COLOR, (x, 0), (x, SCREEN_HEIGHT), GRID_LINE_WIDTH)
@@ -193,7 +199,8 @@ class Tetris:
         if any(self.board[0][x] != 0 for x in range(COLS)):
             self.game_over = True
 
-    def draw_game_over(self):
+    @staticmethod
+    def draw_game_over():
         font = pygame.font.Font(None, 48)
         text = font.render("Game Over", True, (255, 0, 0))
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
