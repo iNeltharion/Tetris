@@ -224,6 +224,15 @@ def main():
     game.new_piece()
 
     clock = pygame.time.Clock()
+    volume = 0.3  # Начальный уровень громкости
+    volume_display_time = 0  # Таймер отображения уровня громкости
+
+    def draw_volume_level():
+        """Отображает текущий уровень громкости."""
+        font = pygame.font.Font(None, 36)
+        volume_text = font.render(f"Volume: {int(volume * 100)}%", True, (0, 0, 0))
+        volume_rect = volume_text.get_rect(topright=(SCREEN_WIDTH - 10, 10))
+        screen.blit(volume_text, volume_rect)
 
     while True:
         for event in pygame.event.get():
@@ -242,6 +251,14 @@ def main():
                         game.is_fast_falling = True
                     elif event.key == pygame.K_UP:
                         game.rotate_piece()
+                if event.key == pygame.K_PLUS or event.key == pygame.K_KP_PLUS:  # Увеличение громкости
+                    volume = min(1.0, volume + 0.1)  # Максимум 1.0
+                    pygame.mixer.music.set_volume(volume)
+                    volume_display_time = pygame.time.get_ticks()  # Устанавливаем время для отображения
+                elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:  # Уменьшение громкости
+                    volume = max(0.0, volume - 0.1)  # Минимум 0.0
+                    pygame.mixer.music.set_volume(volume)
+                    volume_display_time = pygame.time.get_ticks()  # Устанавливаем время для отображения
             elif event.type == pygame.KEYUP and not game.is_paused:
                 if event.key == pygame.K_DOWN:
                     game.is_fast_falling = False
@@ -260,6 +277,10 @@ def main():
         game.draw_board()
         game.draw_score()
 
+        # Отображение уровня громкости в течение 1 секунды
+        if pygame.time.get_ticks() - volume_display_time <= 1000:
+            draw_volume_level()
+
         if game.game_over:
             game.draw_game_over()
 
@@ -268,6 +289,7 @@ def main():
 
         pygame.display.update()
         clock.tick(30)
+
 
 
 if __name__ == "__main__":
