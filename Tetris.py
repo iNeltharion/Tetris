@@ -50,6 +50,7 @@ class Tetris:
     def __init__(self):
         self.board = [[0] * COLS for _ in range(ROWS)]
         self.game_over = False
+        self.is_paused = False
         self.current_piece = None
         self.current_pos = None
         self.score = 0
@@ -58,6 +59,14 @@ class Tetris:
         self.fall_speed_fast = 0.05  # ускоренная скорость падения при зажатой стрелке вниз
         self.is_fast_falling = False  # флаг, отвечающий за ускоренное падение
         self.piece_history = []  # История использованных фигур
+
+
+    def draw_pause_message(self):
+        """Рисует сообщение о паузе на экране."""
+        font = pygame.font.Font(None, 48)
+        text = font.render("Paused", True, (0, 0, 255))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        screen.blit(text, text_rect)
 
     def new_piece(self):
         # Генерация новой фигуры, которая не повторяется сразу после предыдущей
@@ -215,15 +224,18 @@ def main():
                 pygame.quit()
                 return
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    game.move_piece(-1, 0)
-                elif event.key == pygame.K_RIGHT:
-                    game.move_piece(1, 0)
-                elif event.key == pygame.K_DOWN:
-                    game.is_fast_falling = True
-                elif event.key == pygame.K_UP:
-                    game.rotate_piece()
-            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    game.is_paused = not game.is_paused  # Переключение паузы
+                elif not game.is_paused:  # Обработка клавиш только если игра не на паузе
+                    if event.key == pygame.K_LEFT:
+                        game.move_piece(-1, 0)
+                    elif event.key == pygame.K_RIGHT:
+                        game.move_piece(1, 0)
+                    elif event.key == pygame.K_DOWN:
+                        game.is_fast_falling = True
+                    elif event.key == pygame.K_UP:
+                        game.rotate_piece()
+            elif event.type == pygame.KEYUP and not game.is_paused:
                 if event.key == pygame.K_DOWN:
                     game.is_fast_falling = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -234,7 +246,7 @@ def main():
                         game.__init__()
                         game.new_piece()
 
-        if not game.game_over:
+        if not game.is_paused and not game.game_over:
             game.auto_fall()
             game.check_game_over()
 
@@ -243,6 +255,9 @@ def main():
 
         if game.game_over:
             game.draw_game_over()
+
+        if game.is_paused and not game.game_over:
+            game.draw_pause_message()
 
         pygame.display.update()
         clock.tick(30)
