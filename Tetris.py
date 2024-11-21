@@ -97,20 +97,42 @@ class Tetris:
         self.current_pos = [0, COLS // 2 - len(self.current_piece[0]) // 2]
 
     def draw_next_piece(self):
-        """Отображение следующей фигуры."""
+        """Отображение следующей фигуры с прозрачностью и выделением контуров."""
         font = pygame.font.Font(None, 36)
         text = font.render("Next:", True, (0, 0, 0))
         screen.blit(text, (10, 50))  # Позиция текста
 
+        # Создаем поверхность с поддержкой альфа-канала
+        transparent_surface = pygame.Surface(
+            (len(self.next_piece[0]) * BLOCK_SIZE, len(self.next_piece) * BLOCK_SIZE), pygame.SRCALPHA
+        )
+        transparent_surface.set_alpha(128)  # Устанавливаем прозрачность (0-255)
+
+        # Цвет для следующей фигуры
+        gray = (128, 128, 128, 128)  # Серый цвет с альфа-каналом
+        border_color = (0, 0, 0, 255)  # Черный цвет для контуров (полностью непрозрачный)
+
         for y, row in enumerate(self.next_piece):
             for x, cell in enumerate(row):
                 if cell:
+                    # Рисуем сам блок
                     pygame.draw.rect(
-                        screen,
-                        self.next_piece_color,
-                        (10 + x * BLOCK_SIZE, 80 + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE),
+                        transparent_surface,
+                        gray,
+                        (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE),
                         border_radius=5,
                     )
+                    # Рисуем контур блока
+                    pygame.draw.rect(
+                        transparent_surface,
+                        border_color,
+                        (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE),
+                        width=2,  # Толщина линии
+                        border_radius=5,
+                    )
+
+        # Отображаем прозрачную поверхность на экране
+        screen.blit(transparent_surface, (10, 80))  # Позиция фигуры
 
     def rotate_piece(self):
         rotated_piece = [list(row) for row in zip(*self.current_piece[::-1])]  # Поворот фигуры
