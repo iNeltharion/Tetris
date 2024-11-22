@@ -1,7 +1,7 @@
 @echo off
 
 :: Set required Python version
-set REQUIRED_PYTHON_VERSION=3.10
+set REQUIRED_PYTHON_VERSION=3.12.7
 
 :: Check if Python is installed
 python --version >nul 2>&1
