@@ -50,10 +50,12 @@ pygame.mixer.music.play(-1, 0.0)  # Повторение музыки беско
 class Tetris:
     def __init__(self):
         self.current_color = None
+        self.next_piece_color = None  # Цвет следующей фигуры
         self.board = [[0] * COLS for _ in range(ROWS)]
         self.game_over = False
         self.is_paused = False
         self.current_piece = None
+        self.next_piece = None  # Следующая фигура
         self.current_pos = None
         self.score = 0
         self.last_move_time = time.time()
@@ -72,18 +74,65 @@ class Tetris:
         screen.blit(text, text_rect)
 
     def new_piece(self):
+        """Генерация текущей и следующей фигур."""
+        if self.next_piece is None:
+            self.next_piece = random.choice(SHAPES)
+            self.next_piece_color = random.choice(COLOR_LIST)
+
+        self.current_piece = self.next_piece
+        self.current_color = self.next_piece_color
+
+        # Генерируем следующую фигуру
         shape_type = random.choice([
             s for s in SHAPES
             if s not in [piece for piece in self.piece_history[-3:]]
-        ])  # Избегаем повторения типов фигур
+        ])
+        self.next_piece = shape_type
+        self.next_piece_color = random.choice(COLOR_LIST)
+
         self.piece_history.append(shape_type)
         if len(self.piece_history) > 5:
             self.piece_history.pop(0)
 
-        color = random.choice(COLOR_LIST)
-        self.current_piece = shape_type
-        self.current_color = color
         self.current_pos = [0, COLS // 2 - len(self.current_piece[0]) // 2]
+
+    def draw_next_piece(self):
+        """Отображение следующей фигуры с прозрачностью и выделением контуров."""
+        font = pygame.font.Font(None, 36)
+        text = font.render("Next:", True, (0, 0, 0))
+        screen.blit(text, (10, 50))  # Позиция текста
+
+        # Создаем поверхность с поддержкой альфа-канала
+        transparent_surface = pygame.Surface(
+            (len(self.next_piece[0]) * BLOCK_SIZE, len(self.next_piece) * BLOCK_SIZE), pygame.SRCALPHA
+        )
+        transparent_surface.set_alpha(128)  # Устанавливаем прозрачность (0-255)
+
+        # Цвет для следующей фигуры
+        gray = (128, 128, 128, 128)  # Серый цвет с альфа-каналом
+        border_color = (0, 0, 0, 255)  # Черный цвет для контуров (полностью непрозрачный)
+
+        for y, row in enumerate(self.next_piece):
+            for x, cell in enumerate(row):
+                if cell:
+                    # Рисуем сам блок
+                    pygame.draw.rect(
+                        transparent_surface,
+                        gray,
+                        (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE),
+                        border_radius=5,
+                    )
+                    # Рисуем контур блока
+                    pygame.draw.rect(
+                        transparent_surface,
+                        border_color,
+                        (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE),
+                        width=2,  # Толщина линии
+                        border_radius=5,
+                    )
+
+        # Отображаем прозрачную поверхность на экране
+        screen.blit(transparent_surface, (10, 80))  # Позиция фигуры
 
     def rotate_piece(self):
         rotated_piece = [list(row) for row in zip(*self.current_piece[::-1])]  # Поворот фигуры
@@ -276,6 +325,7 @@ def main():
 
         game.draw_board()
         game.draw_score()
+        game.draw_next_piece()  # Рисуем следующую фигуру
 
         # Отображение уровня громкости в течение 1 секунды
         if pygame.time.get_ticks() - volume_display_time <= 1000:
@@ -289,6 +339,7 @@ def main():
 
         pygame.display.update()
         clock.tick(30)
+
 
 
 
