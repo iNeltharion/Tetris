@@ -39,7 +39,7 @@ powershell -Command "& { (New-Object System.Net.WebClient).DownloadFile('https:/
 
 :: Install Python silently
 echo Installing Python %REQUIRED_PYTHON_VERSION%...
-python-installer.exe /quiet InstallAllUsers=1 PrependPath=1
+python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=1 Include_dev=1 SimpleInstall=1
 if %errorlevel% neq 0 (
     echo Python installation failed. Please install Python manually.
     pause
